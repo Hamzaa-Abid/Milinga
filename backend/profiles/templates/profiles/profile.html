@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block head_title %}{% trans 'Update Profile' %}{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.min.css" integrity="sha384-gmcw+R0EXbFmHe5f/e/UutiOrxubA/LkUzBVH0Y7uvP+IqhUSNFp7HZKD6ztR12u" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.10/css/select2.min.css" integrity="sha384-KZO2FRYNmIHerhfYMjCIUaJeGBRXP7CN24SiNSG+wdDzgwvxWbl16wMVtWiJTcMt" crossorigin="anonymous">
+
+<style>
+
+.file-upload {
+   display: none;
+}
+
+.upload-button {
+ font-size: 1.2em;
+}
+
+.pro-img  {
+ position: relative;
+}
+
+.pro-img i {
+ position: absolute;
+ bottom: 0;
+ right: 0;
+ width: 50px;
+ height: 50px;
+ text-align: center;
+ padding-top: 15px;
+ color: #fff;
+ cursor: pointer;
+ background: rgba(0,0,0,.3);
+ display: none;
+}
+
+.clickable-image
+{
+    cursor: pointer;
+}
+
+
+</style>
+{% endblock %}
+
+{% block content %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.10/js/select2.min.js" integrity="sha384-KjsJwMB03GQH/gvsBTpEONeOUBnRY/Dpp+iDzeS4BMQi2Ayl2emKLGuLr3gChQhv" crossorigin="anonymous"></script>
+
+<script type="text/javascript">
+
+$(document).ready(function() {
+
+  jQuery(".pro-img").hover(function() {
+    jQuery(".pro-img i").slideToggle();
+  });
+
+  $(".upload-button").click(function(){
+    $(".file-upload").click();
+  });
+
+  $('#profile-pic').click(function(){
+    $('.file-upload').click();
+  })
+
+  $(".file-upload").on('change', function(){
+    var formData = new FormData();//$('#upload_image_form')[0]);
+    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    formData.append('profilePic', this.files[0]);
+
+    $.ajax({
+      url: "{% url 'update_profile_pic' %}",
+      type: 'POST',
+      cache: false,
+      async: true,
+      dataType: 'json',
+      processData: false,
+      data: formData,
+      enctype: 'multipart/form-data',
+      contentType: false,
+      success: function(response){
+        $("#profile-pic").attr("src",response.image_url);
+      },
+    });
+  });
+
+  $("#isTeacherCheckbox").change(function(){
+    if(this.checked){
+      $("#teacherCollapse").collapse("show")
+    } else {
+      $("#teacherCollapse").collapse("hide")
+    };
+  })
+
+  {% if form_data_saved == True %}
+  // $.toast({
+  //   title: 'Saved',
+  //   // subtitle: '11 mins ago',
+  //   content: 'Profil gespeichert',
+  //   container: $('main'),
+  //   type: 'info',
+  //   delay: 3000
+  // });
+  $("#success-alert").fadeTo(2000, 500).slideUp(500, function(){
+    $("#success-alert").slideUp(2000);
+  });
+  {% endif %}
+  {% if form_data_error == True %}
+  $("#error-alert").fadeTo(2000, 500);
+  {% endif %}
+
+});
+
+</script>
+{% if form_data_saved == True %}
+<div class="alert alert-success" id="success-alert" role="alert">
+  Profil wurde aktualisiert!
+</div>
+{% endif %}
+{% if form_data_error == True %}
+<div class="alert alert-error" id="error-alert" role="alert">
+  Fehler!
+</div>
+{% endif %}
+
+<form id="upload_image_form" action="{% url 'update_profile_pic' %}" method="post" enctype="multipart/form-data" class="clickable-image">
+  {% csrf_token %}
+  <input name="profilePic" class="file-upload" type="file" accept="image/*"/>
+</form>
+
+
+<!-- <form action="{% url 'update_profile_pic' %}" method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <input name="profilePic" type="file" accept="image/*"/>
+  <button type="submit" class="btn btn-primary">Update Profile Pic</button>
+</form> -->
+
+
+<h1>{% trans 'Profile'%}</h1>
+<form method="post">
+  {% csrf_token %}
+  <div class="form-row py-2">
+    <!-- Thumbnail -->
+    <div class="col-lg-4 col-md-4 col-sm-6 col-6">
+      <div class="pro-img">
+        <img id="profile-pic" class="img-fluid rounded w-100 clickable-image"
+          src="{% if profile_pic %}{{ profile_pic.url }}{% else %}{% static 'img/noprofilepic.png' %}{% endif %}" />
+        <i class="fas fa-pencil-alt upload-button"></i>
+      </div>
+    </div>
+    <!-- Name/Description -->
+    <div class="form-row col-lg-8 col-md-8 col-sm-6 col-6">
+      <div class="form-group mb-0 col-lg-12 col-md-12 col-sm-12 col-12">
+        {{ user_form.first_name|as_crispy_field }}
+      </div>
+      <div class="form-group mb-0 col-lg-12 col-md-12 col-sm-12 col-12">
+        {{ user_form.last_name|as_crispy_field }}
+      </div>
+    </div>
+  </div>
+  <div class="float-right col-lg-12 col-md-12 col-sm-12 col-12 px-0">
+    {{ profile_form.description_short|as_crispy_field }}
+  </div>
+  {{ profile_form.description|as_crispy_field }}
+
+  {% include "teachers/incl_profile_teacher.html" with teacher_form=teacher_form %}
+
+  <button type="submit" class="btn btn-primary"><i class="fas fa-user-edit"></i> {% trans 'Update Profile'%}</button>
+  </div>
+</form>
+{% endblock %}

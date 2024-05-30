@@ -1,0 +1,148 @@
+{% load static i18n videoconference %}
+{#% spaceless %#}
+{% get_current_language as LANGUAGE_CODE %}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block head_title %}{% endblock %}</title>
+  <link rel="shortcut icon" type="image/png" href="{% static 'img/favicon.png' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/fontawesome.min.css" integrity="sha384-+pqJl+lfXqeZZHwVRNTbv2+eicpo+1TR/AEzHYYDKfAits/WRK21xLOwzOxZzJEZ" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/solid.min.css" integrity="sha384-doPVn+s3XZuxfJLS7K1E+sUl25XMZtTVb3O46RyV3JDU2ehfc0Aks4z0ufFpA2WC" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/regular.min.css" integrity="sha384-zgXo5aJZxI4cJSgWSRtbv7q4JB6PzrmOTAWiZt2CqN25ifeKsCuQZ/pUNoPgjcTb" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-theme/0.1.0-beta.10/select2-bootstrap.min.css" integrity="sha384-gmcw+R0EXbFmHe5f/e/UutiOrxubA/LkUzBVH0Y7uvP+IqhUSNFp7HZKD6ztR12u" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.10/css/select2.min.css" integrity="sha384-KZO2FRYNmIHerhfYMjCIUaJeGBRXP7CN24SiNSG+wdDzgwvxWbl16wMVtWiJTcMt" crossorigin="anonymous">
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.4.18/css/alt/AdminLTE-without-plugins.min.css" integrity="sha384-4DGaT9Bb5fhlCI5M2ART9BqSlSZw6s5/cDIhiV1BYhNfu+PTYVKbmYP9l/OJiBAO" crossorigin="anonymous">
+  
+  <link rel="stylesheet" href="{% static 'bootstrap4-dialog/bootstrap-dialog.min.css' %}">
+  <link rel="stylesheet" href="{% static 'bs4-toast/toast.min.css' %}">
+  
+  <style>
+  .fixed-bottom-right {
+    position: -webkit-fixed; /* Safari */
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    z-index:1000;
+  }
+  </style>
+  
+  <style>
+  .select2 {
+    width:100%!important;
+  }
+  </style>
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha384-vk5WoKIaW/vJyUAd9n/wmopsmNhiy+L2Z+SBxGYnUkunIxVxAv/UtMOhba/xskxh" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.10/js/select2.min.js" integrity="sha384-KjsJwMB03GQH/gvsBTpEONeOUBnRY/Dpp+iDzeS4BMQi2Ayl2emKLGuLr3gChQhv" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.10/js/i18n/{{LANGUAGE_CODE}}.js"></script>
+  {% if user.is_authenticated %}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.min.js" integrity="sha384-FtJyC+/3fgtPbqlacLHdGwBrmPjKoYBsiqNF5/BEprsnIXB4xtXLCJRx7Xx+TWKP" crossorigin="anonymous"></script>
+  <script src="{% static 'js/ws.js' %}"></script>
+  {% endif %}
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.4.18/js/adminlte.min.js" integrity="sha384-EIVq4SXJ6adN7U+wvj/1MBCeB/kj+UzYJ1tR8pDrvvPy58x3ZdcT4ryMAp9i3FZZ" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.2.1/js.cookie.min.js" integrity="sha384-eITc5AorI6xzkW7XunGaNrcA0l6qrU/kA/mOhLQOC5thAzlHSClQTOecyzGK6QXK" crossorigin="anonymous"></script>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2.2.0/jquery.countdown.min.js" integrity="sha384-7YJwK4FAGCi2soEP7g3v8myqDvUnb6lnbRjgOGe4Tf+LqoiEbtJLfX41zYKGCs4F" crossorigin="anonymous"></script>
+
+  <script src="{% static 'bootstrap4-dialog/bootstrap-dialog.min.js' %}"></script>
+  <script src="{% static 'bs4-toast/toast.min.js' %}"></script>
+
+  <script>
+    $(function(){
+      // function formatLanguage (language) {
+      //   if (!language.id) { return language.text; }
+      //   var $language = $('<span><img src="{% static 'flags/' %}' +  language.element.value + '.gif" class="img-flag" /> ' + language.text + '</span>');
+      //   return $language;
+      // };
+
+      $('#select_language_select').select2({
+        maximumInputLength : 30,
+        language : '{{LANGUAGE_CODE}}',
+        // templateResult: formatLanguage,
+        // templateSelection: formatLanguage,
+      }).change(function(){
+        $('#select_language_form').submit();
+      });
+
+      wsOnReceive('lesson_booked', function(oEvent){
+        alert('Student: ' + oEvent.student.name + ', Profilfoto: '+ oEvent.student.imageURL+', Startzeit: ' + new Date(oEvent.event.start*1000).toLocaleString())
+      });
+
+    });
+  </script>
+  <div class="sticky-top">
+    <nav class="navbar navbar-light" style="background-color: #e3f2fd;">
+      <a class="navbar-brand" href="/">
+        <img src="{% static 'img/favicon.png' %}" width="30" height="30" class="d-inline-block align-top" alt="">
+        milinga
+      </a>
+      <div class="navbar-expand justify-content-end">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'searchteacher' %}"><i class="fas fa-chalkboard-teacher"></i> {% trans "Teachers" %}</a>
+            </li>
+            {% if user.is_authenticated %}
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false"><i class="fas fa-tools"></i> {% trans "Settings" %}</a>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="{% url 'profile' %}"><i class="fas fa-user-edit"></i> {% trans "My Profile" %}</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="{% url 'working_time' %}"><i class="far fa-calendar-alt"></i> {% trans "My Calendar" %}</a>
+                <div class="dropdown-divider"></div>
+                <form action="{% url 'set_language' %}" method="post" id="select_language_form">{% csrf_token %}
+                  {#<input type="hidden" name="next" value="{{ redirect_to }}">#}
+                  <select class="dropdown-item select2" id="select_language_select" name="language">
+                    {% get_available_languages as LANGUAGES %}
+                    {% get_language_info_list for LANGUAGES as languages %}
+                    {% for language in languages %}
+                      <option value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %} selected {% endif %}>
+                        {{ language.name_local }}
+                      </option>
+                      {% endfor %}
+                  </select>
+                </form>
+              </div>
+            </li>
+          <li class="nav-item">
+            <a class="nav-link" href="javascript:{document.getElementById('logout').submit()}"><i class="fas fa-sign-out-alt"></i> {% trans "Logout" %}</a>
+            <form id='logout' method='POST' action='{% url "account_logout" %}'>
+              {% csrf_token %}
+              <input type="hidden" />
+            </form>
+          </li>
+          {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'account_signup' %}"><i class="fas fa-user-plus"></i> {% trans "Sign Up" %}</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'account_login' %}"><i class="fas fa-sign-in-alt"></i> {% trans "Sign In" %}</a>
+          </li>
+          {% endif %}
+        </ul>
+      </div>
+    </nav>
+    {% block navbar %}{% endblock %}
+  </div>
+  <main>
+    {% show_next_videoconference user %}
+    {% block content_no_space %}
+    <div class="container align-items-center justify-content-center my-4">
+      {% block content %}{% endblock %}
+    </div>
+    {% endblock %}
+
+    {% if user.is_authenticated %}{% include 'chat/incl_chat.html' with user=user %}{% endif %}
+
+  </main>
+</body>
+</html>
+{#% endspaceless %#}

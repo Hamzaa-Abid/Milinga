@@ -1,0 +1,35 @@
+{% load static %}
+
+<div class="row px-2 py-2 no-gutters border rounded overflow-hidden mb-4 shadow-sm">
+  <div class="col-3 order-1 col-sm-3 order-sm-1 px-2" style="transform: rotate(0);"> <!-- Profile Pic-->
+    <a href="{% url 'book_lesson' teacher.user_id %}" class="stretched-link">
+      <img class="shadow-sm img-fluid w-100" src="{% if teacher.profilePic %}{{ teacher.profilePic.url }}{% else %}{% static 'img/noprofilepic.png' %}{% endif %}" />
+    </a>
+  </div>
+  <div class="col-9 order-last col-sm-6 order-sm-2 px-2" style="transform: rotate(0);"> <!-- middle box -->
+    {% comment %}<!--<strong class="d-inline-block mb-2 text-primary">{{ teacher.user.first_name }} {{ teacher.user.last_name }}</strong>-->{% endcomment %}
+    <div class="row col-12">
+      <h3 class="px-0 col-9">{{ teacher.first_name }} {{ teacher.last_name }}</h3>
+      {% comment %}
+      <span class="col-3 text-nowrap" style="font-size: 0.8em"> <!-- User Rating -->
+        <span style="color: rgb(201, 201, 0);">
+          {% for i in teacher.rating_full_count %}{#teacher.rating|floatformat:1#}
+            <i class="fas fa-star"></i>
+          {% endfor %}
+          {% if teacher.rating_half_bool == True %}
+            <i class="fas fa-star-half"></i>
+          {% endif %}
+        </span>
+        {#<a href="{% url 'rate_user' teacher.user_id %}">{% if teacher.rating != -1 %}{{teacher.rating|floatformat:1}}{% else %}?{% endif %}</a>#}
+      </span>
+      {% endcomment %}
+    </div>
+    <div class="mb-1 text-muted">{{ teacher.teaches |join:", " }}</div>
+
+    <p class="card-text mb-auto">{{ teacher.description_short }}</p>
+    <a href="javascript:newChat({'id':'{{ teacher.user_id }}','name':'{{ teacher.first_name }} {{ teacher.last_name }}', 'imageURL':'{% if teacher.profilePic %}{{ teacher.profilePic.url }}{% else %}{% static 'img/noprofilepic.png' %}{% endif %}', 'messages':[]}){#% url 'book_lesson' teacher.user_id %#}" class="stretched-link"></a>
+  </div>
+  <div class="col-6 order-2 d-none d-sm-block col-sm-3 order-sm-3 px-2 justify-content-end"> <!-- Video -->
+    <div class="video-player" data-plyr-provider="{% if 'youtu' in teacher.videoUrl %}youtube{% else %}vimeo{% endif %}" data-plyr-embed-id="{{ teacher.videoUrl }}"></div>
+  </div>
+</div>

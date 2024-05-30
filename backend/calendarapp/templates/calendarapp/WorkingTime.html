@@ -1,0 +1,476 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block head_title %}{% trans 'Availability' %}{% endblock %}
+{% block head %}
+{% get_current_language as LANGUAGE_CODE %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/core/main.min.css" integrity="sha384-LT80NAYxdFHV+eb4p81xyiJfn0RJBEKx5we+WMHJoGFu7gb0QdeABGJRIbhzVDLc" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/core/main.min.js" integrity="sha384-K4Nk3M58Sssp/XurpWfEZ76LWjdoa+RP28r8FR6/pc9tKVXcu+r8Bo+Q49u1u0n1" crossorigin="anonymous"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/interaction/main.min.js" integrity="sha384-5uNkKgzxuAFvHLT4EgXdti4aGlUeT2E0iMU0WCefqJ8TvCiQgVDIo/tZnbr3UqBP" crossorigin="anonymous"></script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/daygrid/main.min.css" integrity="sha384-5m45pc31QlOATrLTYl6OsnvUxXEkvEOROKGPBo+HTYBXEIAJjNxMs0RNboI1pgSz" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/daygrid/main.min.js" integrity="sha384-WAbVrXKvOJdT9sojDH99GVYsiSZf8OrZsvSgzPg8XDeFohOkapJOq8paidZt+xqb" crossorigin="anonymous"></script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/timegrid/main.min.css" integrity="sha384-gJUxcXD4FR3Hzo+dsxk9UcVDTQv7Cv9GELu6FqguaP4crr7ls+sE8AZxph+sc3Si" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/timegrid/main.min.js" integrity="sha384-jm3NYJwCWslUmGc1Icg+IbXlynf4LhRJCNCd51f+sP1zWDCAMFgv/BUbpmz8XKI4" crossorigin="anonymous"></script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/list/main.min.css" integrity="sha384-STNimv65QXJ8dKDDLp0gUgRiYbCAka6H+YZDGWX7OwPFvtdpf2B3v8Eo6zu89z2d" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/list/main.min.js" integrity="sha384-ReRjSxvBc/7bTQiqM7TYyrD+BI3+RH0dwvv89O5REmrTgjHmVlkeTllXYhZIZXtG" crossorigin="anonymous"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/core/locales/{{LANGUAGE_CODE}}.js" crossorigin="anonymous"></script>
+{% endblock %}
+
+{% block content_no_space %}
+{% get_current_language as LANGUAGE_CODE %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    // function getTooltipText(element){
+    //     if(element.groupId == 'available'){
+    //         return 'The teacher has time for you. Drop an event here.';
+    //     }
+    //     if(element.overlap == false){
+    //         return 'The teacher doesn´t have time here. Choose another time!';
+    //     }
+    //     if(element.startEditable == false){
+    //         return 'Somebody else booked this event.'
+    //     }
+    //     if(element.startEditable == true){
+    //         return 'This is your event. You can move it somewhere else, or confirm the booking.'
+    //     }
+    //     return '???'
+    // }
+
+    var oSelectionStarted={};
+
+    var sBGColorTeacherConfirmed = '#55ae7a';
+    var sBGColorTeacherNotConfirmed = '#ffff00';
+
+    var bDrawAvailable = true;
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        plugins: [ 'interaction', 'timeGrid' ],
+        // customButtons: {
+            // btnAvailable: {
+            //     text: '{% trans "available" %}',
+            //     click: function() {
+            //         if(bDrawAvailable == true){
+            //             bDrawAvailable = false;
+            //             $('.fc-btnAvailable-button').css({'background-color':'#ff8888'}).text('{% trans "not available" %}');
+            //         } else {
+            //             bDrawAvailable = true;
+            //             $('.fc-btnAvailable-button').css({'background-color':'#88ff88'}).text('{% trans "available" %}');
+            //         }
+            //     }
+            // },
+            // btnSave: {
+            //     text: '{% trans "save" %}',
+            //     click: function() {
+            //         var oEvents = calendar.getEvents().filter(function(oEvent){
+            //             return oEvent.rendering === 'background';
+            //         });
+            //         var working_times = JSON.stringify($.map(oEvents, function(oEvent){
+            //             return {
+            //                 start: oEvent.start.getTime() / 1000,
+            //                 end: oEvent.end.getTime() / 1000,
+            //             }
+            //         }))
+            //         $.ajax({
+            //             url: "{#% url 'myavailability_ajax' %#}",
+            //             type: 'POST',
+            //             cache: false,
+            //             async: true,
+            //             data: {
+            //                 csrfmiddlewaretoken: '{{ csrf_token }}',
+            //                 working_times : working_times,
+            //             },
+            //             success: function(response){
+            //                 //alert('gespeichert');
+            //             },
+            //         });
+            //     }
+            // },
+        // },
+        header: {
+            left: 'prev, today',
+            center: 'title',
+            right: 'next',//btnSave btnAvailable',
+        },
+        viewSkeletonRender: function(info){
+            $('.fc-btnAvailable-button').css({'background-color':'#88ff88'}).text('{% trans "available" %}');
+        },
+        defaultView: 'timeGridWeek',
+        // views: {
+        //     Custom: {
+        //         type: 'timeGrid',
+        //         duration: { days: 14 },
+        //         buttonText: '14 days',
+        //         dateIncrement: { days: 7 },
+        //     },
+        // },
+        //defaultDate: '2019-08-12',
+        navLinks: true, // can click day/week names to navigate views
+        // weekNumbers: true,
+        // weekNumbersWithinDays: true,
+        // businessHours: true, // display business hours
+        businessHours: {
+            startTime: '08:00', // a start time (10am in this example)
+            endTime: '20:00', // an end time (6pm in this example)
+        },
+        editable: true,
+        // droppable: true,
+
+        eventOverlap: function(stillEvent, movingEvent) {
+            return stillEvent.rendering == 'background';
+        },
+        selectOverlap: function(event) {
+            return event.rendering === 'background';
+        },
+
+        locale:'{{LANGUAGE_CODE}}',
+        nowIndicator:true,
+        slotDuration:'00:30:00',
+        // slotLabelInterval:'00:30:00',
+        snapDuration:'00:30:00',
+        minTime:'07:00:00',
+        maxTime:'22:00:00',
+        scrollTime:'08:00:00',
+        height: 'auto',
+        // resources: {
+        //     url: '/my-resource-script.php',
+        //     method: 'POST'
+        // },
+        // defaultTimedEventDuration: '00:55:00',
+        // forceEventDuration: true,
+        events: [
+            {% for working_time in working_times %}
+            {
+                start: new Date({{ working_time.from | stringformat:"f" }}*1000),
+                end: new Date({{ working_time.till | stringformat:"f" }}*1000),
+                rendering: 'background',
+                color: '#88ff88',
+                extendedProps: {
+                    eventId: {{working_time.id}},
+                }
+            },
+            {% endfor %}
+            {% for my_booking in my_bookings %}
+            {
+                start: new Date({{ my_booking.from | stringformat:"f" }}*1000),
+                end: new Date({{ my_booking.till | stringformat:"f" }}*1000),
+                durationEditable: false,
+                color: {% if my_booking.teacherConfirmed == True %}sBGColorTeacherConfirmed{% else %}sBGColorTeacherNotConfirmed{% endif %},
+                extendedProps:{
+                    type: 'myevent',
+                    eventId: {{my_booking.id}},
+                }
+            },
+            {% endfor %}
+        ],
+        // eventRender: function(info) {
+        //     if(info.isMirror)
+        //         return;
+        //     $(info.el).tooltip({
+        //         title: getTooltipText(info.event),//info.event.extendedProps.description,
+        //         placement: 'top',
+        //         trigger: 'hover',
+        //         container: 'body',
+        //         delay: {
+        //             "show": 200,
+        //             "hide": 100,
+        //         },
+        //     });
+        // },
+
+        // SELECT:
+        selectable: true, //Stunden / Tage selektieren
+        unselectAuto: false,
+        selectOverlap: true,
+        selectMirror: false, //placeholder-Event beim selektieren anzeigen
+        // selectConstraint : 'available', //man darf ein Event nur in der Available-Zeit auswählen
+        selectMinDistance : 1,
+        longPressDelay : 1000,
+        eventBackgroundColor: '#88ff88',
+        select: function(selectionInfo){
+            //create or remove?
+            var tStartTime;
+            if(oSelectionStarted.start === selectionInfo.start.getTime()){
+                tStartTime = oSelectionStarted.start;
+            } else {
+                tStartTime = oSelectionStarted.end;
+            }
+            var oEvents = calendar.getEvents().filter(function(oEvent){
+                return oEvent.rendering === 'background';
+            });
+            bDrawAvailable = true;
+            $.each(oEvents, function(i, oEvent){
+                if((oSelectionStarted.start == selectionInfo.start.getTime() && (oEvent.start.getTime()<=tStartTime && oEvent.end.getTime()>tStartTime))
+                || (oSelectionStarted.end == selectionInfo.end.getTime() && (oEvent.start.getTime()<tStartTime && oEvent.end.getTime()>=tStartTime))){
+                    bDrawAvailable = false;
+                    return false;
+                }
+            })
+            oSelectionStarted = {};
+
+
+            calendar.unselect();
+
+            var oEventsToDelete = [];
+            var oEventsToCreate = [];
+
+            // var oEvents = calendar.getEvents().filter(function(oEvent){
+            //     return oEvent.rendering === 'background';
+            // });
+            $.each(oEvents, function(index, oEvent){
+                if(oEvent.start >= selectionInfo.start && oEvent.end <= selectionInfo.end){
+                    //existing event is inside selected event
+                    // oEvent.remove();
+                    oEventsToDelete.push(oEvent);
+                    return true;
+                }
+                if(oEvent.start <= selectionInfo.start && oEvent.end >= selectionInfo.end){
+                    //existing event is around selected event
+                    if(!bDrawAvailable) {
+                        // oEvent.remove();
+                    //     oEventsToDelete.push(oEvent);
+                    //     selectionInfo.start = oEvent.start;
+                    //     selectionInfo.end = oEvent.end;
+                    // } else {
+                        // oEvent.remove();
+                        oEventsToDelete.push(oEvent);
+                        if(oEvent.start<selectionInfo.start){
+                            oEventsToCreate.push({
+                                start: oEvent.start,
+                                end: selectionInfo.start,
+                            });
+                        }
+                        if(selectionInfo.end<oEvent.end){
+                            oEventsToCreate.push({
+                                start: selectionInfo.end,
+                                end: oEvent.end,
+                            });
+                        }
+                        // self.addEvent({
+                        //     title: '{% trans "available" %}',
+                        //     start: oEvent.start,
+                        //     end: selectionInfo.start,
+                        //     rendering: 'background',
+                        //     color: '#88ff88',
+                        // });
+                        // self.addEvent({
+                        //     title: '{% trans "available" %}',
+                        //     start: selectionInfo.end,
+                        //     end: oEvent.end,
+                        //     rendering: 'background',
+                        //     color: '#88ff88',
+                        // });
+                    }
+                    return true;
+                }
+                if(oEvent.start <= selectionInfo.start && selectionInfo.start <= oEvent.end){
+                    //selected events start is in existing event
+                    if(bDrawAvailable) {
+                        selectionInfo.start = oEvent.start;
+                        // oEvent.remove();
+                        oEventsToDelete.push(oEvent);
+                    } else {
+                        // oEvent.setEnd(selectionInfo.start);
+                        oEventsToDelete.push(oEvent);
+                        oEventsToCreate.push({
+                            start: oEvent.start,
+                            end: selectionInfo.start,
+                        });
+                        return true;
+                    }
+                }
+                if(oEvent.start <= selectionInfo.end && selectionInfo.end <= oEvent.end){
+                    //selected events end is in existing event
+                    if(bDrawAvailable) {
+                        selectionInfo.end = oEvent.end;
+                        // oEvent.remove();
+                        oEventsToDelete.push(oEvent);
+                    } else {
+                        // oEvent.setStart(selectionInfo.end);
+                        oEventsToDelete.push(oEvent);
+                        oEventsToCreate.push({
+                            start: selectionInfo.end,
+                            end: oEvent.end,
+                        });
+                        return true;
+                    }
+                }
+            });
+            // color = bDrawAvailable == true ? '#88ff88' : '#ff8888';
+            if(bDrawAvailable){
+                oEventsToCreate.push({
+                    start: selectionInfo.start,
+                    end: selectionInfo.end,
+                });
+            }
+
+            $.each(oEventsToDelete, function(i, oEvent){
+                oEvent.remove();
+            });
+
+            var self = this;
+            $.each(oEventsToCreate, function(i, oEvent){
+                self.addEvent({
+                    title: '{% trans "available" %}',
+                    start: oEvent.start,
+                    end: oEvent.end,
+                    rendering: 'background',
+                    color: '#88ff88',//color,
+                });
+            })
+            
+            if(oEventsToCreate.length===0 && oEventsToDelete.length===0){
+                return;
+            }
+            var oToSend = {};
+            if (oEventsToCreate.length>0){
+                oToSend['create'] = $.map(oEventsToCreate, function(oEvent){
+                    return {
+                        start: new Date(oEvent.start).getTime() / 1000,
+                        end: new Date(oEvent.end).getTime() / 1000,
+                    }
+                });
+            }
+            if (oEventsToDelete.length>0){
+                oToSend['delete'] = $.map(oEventsToDelete, function(oEvent){
+                    return {
+                        start: oEvent.start.getTime()/1000,
+                        end: oEvent.end.getTime()/1000,
+                    }
+                });
+            }
+            wsSend('cal_workingtimes', oToSend);
+        },
+        selectAllow: function(selectInfo){
+            //remember start of selection
+            if(oSelectionStarted.start !== selectInfo.start.getTime() && oSelectionStarted.end !== selectInfo.end.getTime()){
+                oSelectionStarted = {
+                    start: selectInfo.start.getTime(),
+                    end: selectInfo.end.getTime(),
+                }
+            }
+            if(selectInfo.start.getDay() != selectInfo.end.getDay()){
+                //just same day
+                return false;
+            }
+            if(selectInfo.start < new Date()) {
+                //not in the past
+                return false;
+            }
+            return true;
+        },
+
+        eventClick: function(eventClickInfo){
+            if(eventClickInfo.event.rendering === 'background') return;
+            $('#confirmationPopup').modal('show');
+            $('#confirmationPopupLessonName').text(eventClickInfo.event.title)
+            $('#confirmationPopupLessonDate').text(eventClickInfo.event.start.toLocaleDateString())
+            $('#confirmationPopupLessonTime').text(eventClickInfo.event.start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}))
+            oEventClicked = eventClickInfo.event;
+        }
+    });
+
+    calendar.render();
+
+    $('#reject_lesson').click(function(){
+        eventAcceptOrReject(bAccept = false)
+    })
+    $('#accept_lesson').click(function(){
+        eventAcceptOrReject(bAccept = true)
+    })
+    function eventAcceptOrReject(bAccept){
+        wsSend('cal_' + (bAccept?'accept_lesson':'reject_lesson'), {
+            'eventId': oEventClicked.extendedProps.eventId,
+        }, function(bSuccess){
+            if(bSuccess === true){
+                if(bAccept){
+                    oEventClicked.setProp('color', sBGColorTeacherConfirmed);
+                } else {
+                    oEventClicked.remove();
+                }
+                $('#confirmationPopup').modal('hide');
+            }
+        });
+    }
+    // calendar.select( '2019-11-08T15:00:00', '2019-11-08T16:00:00' )
+
+    // $(window).on('beforeunload', function(){
+    //   return 'Are you sure you want to leave?';
+    // });
+
+    // $(window).on('unload', function(){
+    //     logout();
+    // });
+
+
+    wsOnReceive('workingtimes_update', function(oWorkingTimes){
+        $.each(oWorkingTimes.delete, function(i, oEvent){
+            calendar.getEvents().filter(function(oEvent2){
+                return oEvent2.rendering === 'background'
+                    && new Date(oEvent2.start).getTime() == oEvent.start*1000
+                    && new Date(oEvent2.end).getTime() == oEvent.end*1000;
+            })[0].remove();
+        });
+        $.each(oWorkingTimes.create, function(i, oEvent){
+            calendar.addEvent({
+                title: '{% trans "available" %}',
+                start: new Date(oEvent.start*1000),
+                end: new Date(oEvent.end*1000),
+                rendering: 'background',
+                color: '#88ff88',//color,
+            });
+        });
+    })
+  });
+
+</script>
+
+<div id='calendar' class='mx-3 mt-3'></div>
+
+<!-- Modal -->
+<div class="modal fade" id="confirmationPopup" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">{% trans 'Do you want to accept this booking?' %}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class='row'>
+                    <div class="row col-12">
+                        <div class="col-4">
+                            {% trans 'Title' %}: 
+                        </div>
+                        <div class="col-8" id='confirmationPopupLessonName'></div>
+                    </div>
+                    <div class="row col-12">
+                        <div class="col-4">
+                            {% trans 'Date' %}:
+                        </div>
+                        <div class="col-8" id='confirmationPopupLessonDate'></div>
+                    </div>
+                    <div class="row col-12">
+                        <div class="col-4">
+                            {% trans 'Time' %}:
+                        </div>
+                        <div class="col-8" id='confirmationPopupLessonTime'></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="reject_lesson" type="button" class="btn btn-danger mr-auto">{% trans 'Reject' %}</button>
+                <button id="accept_lesson" type="button" class="btn btn-success">{% trans 'Accept' %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

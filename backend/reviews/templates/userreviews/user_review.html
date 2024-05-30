@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block head_title %}Home{% endblock %}
+{% block head %}{% endblock %}
+{% block content %}
+<form action="{% url 'rate_user' reviewed %}" method="post">
+  {% csrf_token %}
+  {{form.as_p}}
+  <input type="submit"></input>
+</form>
+{% endblock %}

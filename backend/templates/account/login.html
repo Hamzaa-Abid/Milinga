@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block head_title %}{% trans "Sign In" %}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-social/5.1.1/bootstrap-social.min.css" integrity="sha384-N7gull5mxE2uLDqZ+kcZolhmuopwLtTcThUsVnUS2LVMQljojN9cfJ9A6fUA63zB" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/brands.min.css" integrity="sha384-tft2+pObMD7rYFMZlLUziw/8QrQeKHU4GYYvA5jVaggC74ZrYdTASheA2vckPcX5" crossorigin="anonymous">
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-4 offset-lg-4 col-md-6 offset-md-3 col-sm-8 offset-sm-2 col-12">
+    <div class="page-header">
+      <h1 class="text-wrap text-sm-nowrap text-md-nowrap text-lg-nowrap">{% trans "Sign In" %}</h1>
+    </div>
+
+    <form method="post" action="{% url 'account_login' %}">
+      {% csrf_token %}
+      {% if redirect_field_value %}
+      <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+      {% endif %}
+  
+      <div class="form-group ">
+        {{ form.login|as_crispy_field }}{{form.login.errors}}
+        {{ form.password|as_crispy_field }}{{form.password.errors}}
+        {{ form.remember|as_crispy_field }}{{form.remember.errors}}
+        
+        {% for error in form.non_field_errors %}
+          <h2 class="h5 mb-3 font-weight-normal" style="color:red">{{ error }}</h2>
+        {% endfor %}
+        <button class="btn btn-lg btn-primary btn-block" type="submit">{% trans "Sign In" %}</button>
+      </div>
+  
+      <div class="form-group">
+        <div class="btn-group btn-group-justified form-control-static">
+          <a class="btn btn-link btn-xs ellipsis" href="/accounts/password/reset/{% if redirect_field_value %}?{{ redirect_field_name }}={{ redirect_field_value }}{% endif %}">{% trans "Forgot password?" %}</a>
+          <a class="btn btn-link btn-xs ellipsis" href="/accounts/signup/{% if redirect_field_value %}?{{ redirect_field_name }}={{ redirect_field_value }}{% endif %}">{% trans "Create new account" %}</a>
+        </div>
+      </div>
+    </form>
+    {% comment %}
+    <legend class="text-muted text-center">{% trans "or" %}</legend>
+    <div class="text-center">
+      <div class="row">
+        <div class="col-md-12">
+          <a href="/accounts/facebook/login/?process=login{% if redirect_field_value %}&{{ redirect_field_name }}={{ redirect_field_value }}{% endif %}" title="Facebook" class="btn btn-block btn-social btn-lg btn-facebook">
+            <i class="fab fa-facebook-f"></i> {% trans "Sign in with Facebook" %}
+          </a>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <a href="/accounts/google/login/?process=login{% if redirect_field_value %}&{{ redirect_field_name }}={{ redirect_field_value }}{% endif %}" title="Google" class="btn btn-block btn-social btn-lg btn-google">
+            <i class="fab fa-google"></i> {% trans "Sign in with Google" %}
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endcomment %}
+  </div>
+</div>
+{% endblock %}

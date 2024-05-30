@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block head_title %}Home{% endblock %}
+
+{% block content_no_space %}
+<img src="{% static 'cover.webp' %}" class="w-100"/>
+<!-- Save 10% by using code: SAVE10FP https://www.shutterstock.com/image-vector/multilingual-greeting-flat-vector-illustration-hello-1500308621-->
+<section class="jumbotron text-center">
+  <div class="container">
+    <h1 class="jumbotron-heading">Learn languages online from teachers</h1>
+    <p class="lead text-muted">via videoconferencing</p>
+    {% if not user.is_authenticated %}
+    <a class="btn btn-primary btn-lg" href="{% url 'account_signup' %}">{% trans 'Sign Up' %}</a>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,10 @@
+<svg id="icon_navigation_arrow_forward_24px-2" data-name="icon/navigation/arrow_forward_24px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="15.582" height="15.185" viewBox="0 0 15.582 15.185">
+  <defs>
+    <clipPath id="clip-path">
+      <path id="icon_navigation_arrow_forward_24px" data-name="icon/navigation/arrow_forward_24px" d="M1,8.592H12.17l-4.88,4.88a1.008,1.008,0,0,0,0,1.42,1,1,0,0,0,1.41,0L15.29,8.3a1,1,0,0,0,0-1.41L8.71.292A1,1,0,0,0,7.3,1.7l4.87,4.89H1a1,1,0,0,0,0,2Z" transform="translate(4.209 4.408)" fill="#37474f"/>
+    </clipPath>
+  </defs>
+  <g id="Group_1" data-name="Group 1" transform="translate(-4.209 -4.408)">
+    <path id="icon_navigation_arrow_forward_24px-3" data-name="icon/navigation/arrow_forward_24px" d="M1,8.592H12.17l-4.88,4.88a1.008,1.008,0,0,0,0,1.42,1,1,0,0,0,1.41,0L15.29,8.3a1,1,0,0,0,0-1.41L8.71.292A1,1,0,0,0,7.3,1.7l4.87,4.89H1a1,1,0,0,0,0,2Z" transform="translate(4.209 4.408)" fill="#fab705"/>
+  </g>
+</svg>

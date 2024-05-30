@@ -1,0 +1,507 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block head_title %}{% trans 'My Calendar' %}{% endblock %}
+{% block head %}
+{% get_current_language as LANGUAGE_CODE %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/core/main.min.css" integrity="sha384-LT80NAYxdFHV+eb4p81xyiJfn0RJBEKx5we+WMHJoGFu7gb0QdeABGJRIbhzVDLc" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/core/main.min.js" integrity="sha384-K4Nk3M58Sssp/XurpWfEZ76LWjdoa+RP28r8FR6/pc9tKVXcu+r8Bo+Q49u1u0n1" crossorigin="anonymous"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/interaction/main.min.js" integrity="sha384-5uNkKgzxuAFvHLT4EgXdti4aGlUeT2E0iMU0WCefqJ8TvCiQgVDIo/tZnbr3UqBP" crossorigin="anonymous"></script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/daygrid/main.min.css" integrity="sha384-5m45pc31QlOATrLTYl6OsnvUxXEkvEOROKGPBo+HTYBXEIAJjNxMs0RNboI1pgSz" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/daygrid/main.min.js" integrity="sha384-WAbVrXKvOJdT9sojDH99GVYsiSZf8OrZsvSgzPg8XDeFohOkapJOq8paidZt+xqb" crossorigin="anonymous"></script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/timegrid/main.min.css" integrity="sha384-gJUxcXD4FR3Hzo+dsxk9UcVDTQv7Cv9GELu6FqguaP4crr7ls+sE8AZxph+sc3Si" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/timegrid/main.min.js" integrity="sha384-jm3NYJwCWslUmGc1Icg+IbXlynf4LhRJCNCd51f+sP1zWDCAMFgv/BUbpmz8XKI4" crossorigin="anonymous"></script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/list/main.min.css" integrity="sha384-STNimv65QXJ8dKDDLp0gUgRiYbCAka6H+YZDGWX7OwPFvtdpf2B3v8Eo6zu89z2d" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/list/main.min.js" integrity="sha384-ReRjSxvBc/7bTQiqM7TYyrD+BI3+RH0dwvv89O5REmrTgjHmVlkeTllXYhZIZXtG" crossorigin="anonymous"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/core/locales/{{LANGUAGE_CODE}}.js" crossorigin="anonymous"></script>
+<style>
+.fc-mirror {
+  background-color: #ffff00;
+  border: none;
+}
+</style>
+{% endblock %}
+
+{% block content_no_space %}
+{% get_current_language as LANGUAGE_CODE %}
+<script>
+var calendar;
+document.addEventListener('DOMContentLoaded', function() {
+
+    // function getTooltipText(element){
+    //     if(element.groupId == 'available'){
+    //         return 'The teacher has time for you. Drop an event here.';
+    //     }
+    //     if(element.overlap == false){
+    //         return 'The teacher doesn´t have time here. Choose another time!';
+    //     }
+    //     // if(element.startEditable == false){
+    //     //     return 'Somebody else booked this event.'
+    //     // }
+    //     if(element.extendedProps && element.extendedProps.type == 'myevent'){
+    //         return 'This is your event. You can move it somewhere else, or confirm the booking.'
+    //     }
+    //     return '???'
+    // }
+    var sBGColorTeacherConfirmed = '#55ae7a';
+    var sBGColorTeacherNotConfirmed = '#ffff00';
+
+    var calendarEl = document.getElementById('calendar');
+    oEvents = [
+        {% for working_time in working_times %}
+        {
+            // startTime: '10:30',//new Date({{ working_time.from | stringformat:"f" }}*1000),
+            // endTime: '16:30',//new Date({{ working_time.till | stringformat:"f" }}*1000),
+            // daysOfWeek: [5],
+            start: new Date({{ working_time.from | stringformat:"f" }}*1000),
+            end: new Date({{ working_time.till | stringformat:"f" }}*1000),
+            rendering: 'background',
+            groupId: 'available',
+            color: '#88ff88',
+        },
+        {% endfor %}
+        {% for teacher_event in teacher_events %}
+        {
+            // startTime: '10:30',//new Date({{ working_time.from | stringformat:"f" }}*1000),
+            // endTime: '16:30',//new Date({{ working_time.till | stringformat:"f" }}*1000),
+            // daysOfWeek: [5],
+            start: new Date({{ teacher_event.from | stringformat:"f" }}*1000),
+            end: new Date({{ teacher_event.till | stringformat:"f" }}*1000),
+            // rendering: 'background',
+            // groupId: 'available',
+            color: '#ff8888',
+        },
+        {% endfor %}
+        {% for my_lesson in my_lessons %}
+        {
+            start: new Date({{ my_lesson.from | stringformat:"f" }}*1000),
+            end: new Date({{ my_lesson.till | stringformat:"f" }}*1000),
+            constraint: 'available',
+            editable: false,
+            durationEditable: false,
+            color: {% if my_lesson.teacherConfirmed == False %} sBGColorTeacherNotConfirmed {% else %} sBGColorTeacherConfirmed {% endif %},
+            extendedProps:{
+                type: 'myevent',
+            }
+        },
+        {% endfor %}
+    ]
+    var tEvent_hour_earliest = 24;
+    var tEvent_hour_latest = 0;
+    if(oEvents.length === 0){
+        tEvent_hour_earliest = 10;
+        tEvent_hour_latest = 18;
+    }
+    $.each(oEvents, function(i, oEvent){
+        var start, end;
+        if(oEvent.start){
+            start = oEvent.start;
+            end = oEvent.end;
+        } else {
+            start = oEvent.startTime;
+            end = oEvent.endTime;
+        }
+        if(tEvent_hour_earliest > start.getHours()){
+            tEvent_hour_earliest = start.getHours();
+        }
+        if(tEvent_hour_latest < end.getHours()){
+            tEvent_hour_latest = end.getHours() + (end.getMinutes()>0?1:0);
+        }
+    })
+    calendar = new FullCalendar.Calendar(calendarEl, {
+        plugins: [ 'interaction', 'dayGrid', 'timeGrid', 'list' ],
+        header: {
+            // left: 'prev,next today',
+            // center: 'title',
+            // right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'//,Custom'
+            left: 'prev today',
+            center: 'title',
+            right: 'next'//,Custom'
+        },
+        defaultView: 'timeGridWeek',
+        // views: {
+        //     Custom: {
+        //         type: 'timeGrid',
+        //         duration: { days: 14 },
+        //         buttonText: '14 days',
+        //         dateIncrement: { days: 7 },
+        //     },
+        // },
+        //defaultDate: '2019-08-12',
+        navLinks: true, // can click day/week names to navigate views
+        // weekNumbers: true,
+        // weekNumbersWithinDays: true,
+        // businessHours: true, // display business hours
+        businessHours: {
+            startTime: '08:00', // a start time (10am in this example)
+            endTime: '20:00', // an end time (6pm in this example)
+        },
+        editable: true,
+        droppable: true,
+
+        eventOverlap: function(stillEvent, movingEvent) {
+            return stillEvent.rendering == 'background';
+        },
+
+        locale:'{{LANGUAGE_CODE}}',
+        nowIndicator:true,
+        slotDuration:'00:30:00',
+        // slotLabelInterval:'00:30:00',
+        snapDuration:'00:30:00',
+        minTime:tEvent_hour_earliest+':00:00',
+        maxTime:tEvent_hour_latest+':00:00',
+        scrollTime:'08:00:00',
+        height: 'auto',
+        // resources: {
+        //     url: '/my-resource-script.php',
+        //     method: 'POST'
+        // },
+        defaultTimedEventDuration: '00:55:00',
+        forceEventDuration: true,
+        events: oEvents,
+        // eventRender: function(info) {
+        //     if(info.isMirror)
+        //         return;
+        //     $(info.el).tooltip({
+        //         title: getTooltipText(info.event),//info.event.extendedProps.description,
+        //         placement: 'top',
+        //         trigger: 'hover',
+        //         container: 'body',
+        //         delay: {
+        //             "show": 200,
+        //             "hide": 100,
+        //         },
+        //     });
+        // },
+
+        // SELECT:
+        // select: function(start, end){
+        //     $(".fc-highlight").css("background", sBGColorTeacherNotConfirmed);
+        // },
+        // selectable: true, //Stunden / Tage selektieren
+        // unselectAuto: false,
+        // selectOverlap: false,
+        selectMirror: true, //placeholder-Event beim selektieren anzeigen
+        // selectConstraint : 'available', //man darf ein Event nur in der Available-Zeit auswählen
+        // selectMinDistance : 1,
+        // longPressDelay : 500,
+
+        // select: function(selectionInfo){
+        //     alert(start);
+// start	
+// Date. A date indicating the beginning of the selection.
+
+// end	
+// Date. A date indicating the end of the selection.
+
+// In line with the discussion about the Event object, it is important to stress that the end date property is exclusive. For example, if the selection is all-day and the last day is a Thursday, end will be Friday.
+
+// startStr	
+// String. An ISO8601 string representation of the start date. It will have a timezone offset similar to the calendar’s timeZone e.g. 2018-09-01T12:30:00-05:00. If selecting all-day cells, it won’t have a time nor timezone part e.g. 2018-09-01.
+
+// endStr	
+// String. An ISO8601 string representation of the end date. It will have a timezone offset similar to the calendar’s timeZone e.g. 2018-09-02T12:30:00-05:00. If selecting all-day cells, it won’t have a time nor timezone part e.g. 2018-09-02.
+
+// allDay	
+// Boolean. true or false whether the selection happened on all-day cells.
+
+// jsEvent	
+// The native JavaScript event with low-level information such as click coordinates.
+
+// view	
+// View object. The current Calendar view.
+
+// resource	
+// Resource object. If the current view is a resource view, this is the Resource object that was selected. This is only available when using one of the resource plugins.
+        // },
+        // events: [
+            // {
+            //     title: 'other lesson',
+            //     start: '2019-11-06T14:00:00',
+            //     end: '2019-11-06T14:55:00',
+            //     editable: false,
+            //     color: '#af4f39'
+            // },
+            // {
+            //     title: 'other lesson',
+            //     start: '2019-11-12T14:00:00',
+            //     end: '2019-11-12T14:55:00',
+            //     editable: false,
+            //     color: '#af4f39'
+            // },
+
+            // red areas where no events can be dropped
+            // {
+            //     start: '2019-11-06T13:55:00',
+            //     end: '2019-11-06T14:00:00',
+            //     overlap: false,
+            //     rendering: 'background',
+            //     color: '#ff9f89'
+            // },{
+            //     start: '2019-11-06T14:55:00',
+            //     end: '2019-11-06T15:00:00',
+            //     overlap: false,
+            //     rendering: 'background',
+            //     color: '#ff9f89'
+            // },{
+            //     start: '2019-11-12T13:55:00',
+            //     end: '2019-11-12T14:00:00',
+            //     overlap: false,
+            //     rendering: 'background',
+            //     color: '#ff9f89'
+            // },{
+            //     start: '2019-11-12T14:55:00',
+            //     end: '2019-11-12T15:00:00',
+            //     overlap: false,
+            //     rendering: 'background',
+            //     color: '#ff9f89'
+            // }
+        // ]
+
+
+        dateClick: function(info) {
+            oTimes = findFreeTimes(info.date)
+            if (oTimes === null) return;
+
+            $('#confirmationPopup').modal('show');
+            // $('#confirmationPopupLessonName').text(info.event.title)
+            $('#confirmationPopupLessonDate').text(oTimes.start.toLocaleDateString())
+            $('#confirmationPopupLessonTime').text(oTimes.start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}))
+            // oEventSelectedForBooking = info.event;
+            oEventSelectedForBooking = calendar.addEvent({
+                    title: '',
+                    start: oTimes.start,
+                    end: oTimes.end,
+                    color: sBGColorTeacherNotConfirmed,
+                });
+        },
+
+    });
+
+    calendar.render();
+
+    var oEventSelectedForBooking = null;
+    $('#confirmationPopup').on('hidden.bs.modal', function () {
+        if (oEventSelectedForBooking != null) {
+            oEventSelectedForBooking.remove()
+        }
+    });
+
+    $('#book_lesson').click(function(){
+        // var oEventToBook_json = JSON.stringify({
+        //     start: oEventSelectedForBooking.start.getTime() / 1000,
+        //     end: oEventSelectedForBooking.end.getTime() / 1000,
+        // })
+        wsSend('cal_book_lesson', {
+            'teacher': {{ pk }},
+            'start': oEventSelectedForBooking.start.getTime() / 1000,
+            'end': oEventSelectedForBooking.end.getTime() / 1000,
+        }, function(bSuccess){
+            if(bSuccess){
+                oEventSelectedForBooking.setProp('color', sBGColorTeacherNotConfirmed);
+                oEventSelectedForBooking = null
+                $('#confirmationPopup').modal('hide');
+            } else {
+                if (oEventSelectedForBooking != null) {
+                    oEventSelectedForBooking.remove()
+                }
+            }
+        });
+        // $.ajax({
+        //     url: "{#% url 'book_event_ajax' pk %#}",
+        //     type: 'POST',
+        //     cache: false,
+        //     async: true,
+        //     data: {
+        //         csrfmiddlewaretoken: '{{ csrf_token }}',
+        //         event : oEventToBook_json,
+        //     },
+        //     success: function(response){
+        //         oEventSelectedForBooking.setProp('color', sBGColorTeacherNotConfirmed);
+        //         oEventSelectedForBooking = null
+        //         $('#confirmationPopup').modal('hide');
+        //     },
+        //     error: function(){
+        //         if (oEventSelectedForBooking != null) {
+        //             oEventSelectedForBooking.remove()
+        //         }
+        //     }
+        // });
+    })
+
+    // $('.fc-widget-content').hover(function(){
+    //     if(!$(this).html()){    
+    //         for(i=0;i<7;i++){
+    //             $(this).append('<td class="temp_cell" style="border: 0px; width:'+(Number($('.fc-day').width())+2)+'px"></td>');
+    //         }
+
+    //         $(this).children('td').each(function(){
+    //             $(this).hover(function(){
+    //                 $(this).css({'background-color': '#ffef8f', 'cursor': 'pointer'});
+    //             },function(){
+    //                 $(this).prop('style').removeProperty( 'background-color' );
+    //             });
+    //         });
+    //     }
+    // },function(){
+    //     $(this).children('.temp_cell').remove();
+    // });
+    // FullCalendarInteraction.FeaturefulElementDragging.prototype.setMirrorIsVisible = function(bool){}
+
+    $('#calendar').mousemove(createMirrorEvent)
+    $('#calendar').scroll(createMirrorEvent)
+
+    function createMirrorEvent(mouseEvent){
+        let [date, time] = $(this).getDayTimeCell(mouseEvent)
+        date_start = new Date(date+'T'+time);
+        oTimes = findFreeTimes(date_start);
+        if (oTimes !== null){
+            calendar.select({
+                start: oTimes.start,
+                end: oTimes.end,
+            });
+        } else {
+            calendar.unselect();
+        }
+        // calendar.select( '2019-11-08T15:00:00', '2019-11-08T16:00:00' )
+    }
+
+    function findFreeTimes(startTime) {
+        var iEventDurationInMinutes = 50
+        var timeAfter = new Date(startTime.getTime() + iEventDurationInMinutes*60000);
+        if(checkConstraints(startTime, timeAfter)) {
+            return {
+                'start': startTime,
+                'end': timeAfter,
+            };
+        }
+        
+        var timeBeforeStart = new Date(startTime.getTime() - 30*60000);
+        var timeBeforeEnd = new Date(timeBeforeStart.getTime() + iEventDurationInMinutes*60000);
+        if(checkConstraints(timeBeforeStart, timeBeforeEnd)) {
+            return {
+                'start': timeBeforeStart,
+                'end': timeBeforeEnd,
+            };
+        }
+        return null;
+    }
+
+    function checkConstraints(start, end){
+        oConstraintsInside = calendar.getEvents().filter(function(oEvent){
+            return oEvent.rendering === 'background';
+        });
+        oConstraintsOutside = calendar.getEvents().filter(function(oEvent){
+            return oEvent.rendering !== 'background';
+        });
+        bConstraintsInsideFulfilled = false;
+        $(oConstraintsInside).each(function(i, oItem){
+            if(oItem.start <= start && oItem.end >= end){
+                bConstraintsInsideFulfilled = true;
+                return false;
+            }
+        })
+        if (bConstraintsInsideFulfilled === false){
+            return false;
+        }
+
+        bConstraintsOutsideFulfilled = true;
+        $(oConstraintsOutside).each(function(i, oItem){
+            if((oItem.start <= start && oItem.end >= start)
+                || (oItem.start <= end && oItem.end >= end)) {
+                bConstraintsOutsideFulfilled = false;
+                return false;
+            }
+        })
+        return bConstraintsOutsideFulfilled;
+    }
+
+  });
+
+  (function($) {
+        $.fn.getDayTimeCell = function(mouseEvent) {
+            var mouseX = mouseEvent.pageX;
+            var mouseY = mouseEvent.pageY;
+
+            var calendarId = $(this).attr('id');
+
+            var days = $('#'+calendarId + ' .fc-day');
+            for(var i = 0 ; i < days.length ; i++) {
+                var day = $(days[i]);
+                var offset = day.offset();
+                var width  = day.width();
+                var height = day.height();
+                if (   mouseX >= offset.left && mouseX <= offset.left+width 
+                    && mouseY >= offset.top  && mouseY <= offset.top+height ) {
+                    var rtn_date = day[0].dataset.date;
+                    break;
+                }
+            }
+
+            var times = $('#'+calendarId + ' [data-time]');
+            for(var i = 0 ; i < times.length ; i++) {
+                var time = $(times[i]);
+                var offset = time.offset();
+                var width  = time.width();
+                var height = time.height();
+                if (   mouseX >= offset.left && mouseX <= offset.left+width 
+                    && mouseY >= offset.top  && mouseY <= offset.top+height ) {
+                    var rtn_time = time[0].dataset.time;
+                    break;
+                }
+            }
+
+            return [rtn_date, rtn_time]
+        }
+    }(jQuery));
+
+</script>
+<div id='calendar'></div>
+
+<!-- Modal -->
+<div class="modal fade" id="confirmationPopup" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">{% trans 'Do you want to book the following lesson?' %}</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class='row'>
+                <div class="row col-12">
+                    <div class="col-4">
+                        {% trans 'Title' %}: 
+                    </div>
+                    <div class="col-8" id='confirmationPopupLessonName'></div>
+                </div>
+                <div class="row col-12">
+                    <div class="col-4">
+                        {% trans 'Date' %}:
+                    </div>
+                    <div class="col-8" id='confirmationPopupLessonDate'></div>
+                </div>
+                <div class="row col-12">
+                    <div class="col-4">
+                        {% trans 'Time' %}:
+                    </div>
+                    <div class="col-8" id='confirmationPopupLessonTime'></div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary mr-auto" data-dismiss="modal">{% trans 'Dont book!' %}</button>
+            <button id="book_lesson" type="button" class="btn btn-primary">{% trans 'Book!' %}</button>
+        </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

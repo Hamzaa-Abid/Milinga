@@ -1,0 +1,42 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pylint = "*"
+rope = "*"
+
+[packages]
+django = "==3.1.*"
+whitenoise = "*"
+psycopg2-binary = "*"
+dj-database-url = "*"
+django-countries = "*"
+django-widget-tweaks = "*"
+django-crispy-forms = "*"
+django-imagekit = "*"
+pillow = "*"
+boto3 = "*"
+django-storages = "*"
+django-papertrail = "*"
+django-allauth = "*"
+django-extensions = "*"
+werkzeug = "*"
+pyopenssl = "*"
+django-money = {extras = ["exchange"],version = "*"}
+channels = "*"
+channels-redis = "*"
+uvicorn = "*"
+pyjwt = "*"
+djangorestframework = "*"
+dj-rest-auth = "*"
+pytz = "*"
+django-timezone-field = "*"
+django-modeltranslation = "*"
+huey = "*"
+redis = "*"
+django-cors-headers = "*"
+
+[requires]
+python_version = "3.7"

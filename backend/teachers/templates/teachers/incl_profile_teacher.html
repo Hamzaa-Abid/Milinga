@@ -1,0 +1,95 @@
+{% load i18n %}
+{% load crispy_forms_tags %}
+{% load widget_tweaks %}
+{% get_current_language as LANGUAGE_CODE %}
+<script>
+$(function(){
+  $('#subjects .collapse').collapse('show');
+  $('#subjects .subjectselect').select2()
+  $('#id_teacher_form-pricePerHour_1').select2();
+
+  $('#subjects .subjectdeletebutton').not(":last").click(function(event){
+    removeSubjectSelectField(event.target);
+    return false;
+  })
+
+  var lastElement = $('#subjects .subjectselect').last();
+  if(lastElement.length === 0 || lastElement.val()){
+    addFormSetForm();
+  } else {
+    $('#subjects .subjectdeletebutton').last().removeClass('fa-trash-alt').addClass('fa-plus')
+    lastElement.change(function(){
+      if(lastElement.val()){
+        addFormSetForm();
+      }
+    })
+  }
+})
+
+function addFormSetForm(){
+  $('#subjects .subjectdeletebutton').last().removeClass('fa-plus').addClass('fa-trash-alt').click(function(event){
+    removeSubjectSelectField(event.target);
+    return false;
+  })
+  
+  var form_idx = $('#id_teacher_teaches_formset-TOTAL_FORMS').val();
+	$('#subjects').append($('#empty_form').html().replace(/__prefix__/g, form_idx));
+	$('#id_teacher_teaches_formset-TOTAL_FORMS').val(parseInt(form_idx)+1);
+  
+  var oCollapseItemContainer = $('#subjects')
+  oCollapseItemContainer.children().last().collapse('show')
+  var lastElement = $('#subjects .subjectselect').last();
+  lastElement.change(function(){
+    if(lastElement.val()){
+      addFormSetForm();
+    }
+  })
+  lastElement.select2({
+    // placeholder: "{% trans 'Select a subject' %}",
+    // allowClear: true,
+    language : '{{LANGUAGE_CODE}}'
+  })
+}
+
+function removeSubjectSelectField(oCollapseItem){
+  var oCollapse = $(oCollapseItem.closest('div.collapse'))
+  oCollapse.collapse('hide')
+  oCollapse.children("select")[0].name='';;
+  oCollapse.on('hidden.bs.collapse', function(){oCollapse.remove()});
+}
+
+</script>
+{{ teacher_form.isTeacher|as_crispy_field}}
+{#% crispy_field profile_form.isTeacher %#}
+<div class="collapse {% if teacher_form.isTeacher.value == True %}show{% endif %}" id="teacherCollapse">
+  <h1>{% trans 'Teacher-Profile' %}</h1>
+  {{ teacher_teaches_formset.management_form }}
+  <div id="subjects">
+    {% for form in teacher_teaches_formset.forms %}
+    <div class="collapse col-lg-5 col-md-6 col-xs-auto mb-2 text-nowrap">
+      <a href="#"><i class="fas fa-trash-alt subjectdeletebutton" style="color:#000000 !important"></i></a>&nbsp;&nbsp;
+      {% render_field form.subject class+="select2 subjectselect" %}
+      {{ form.errors }}
+    </div>
+    {% endfor %}
+  </div>
+  {{ teacher_form.videoUrl|as_crispy_field }}
+  {{ teacher_form.pricePerHour|as_crispy_field }}
+  {{ teacher_form.pricePerHour.errors }}
+  
+  {% comment %}
+  {#% render_field teacher_form.pricePerHour %#}
+  {#% render_field teacher_form.pricePerHour.1 %#}
+  <div class="row">
+    <div class="col-lg-2 col-md-3 col-xs-auto">{% render_field teacher_form.pricePerHour.amount %}</div>
+    <div class="col-lg-5 col-md-6 col-xs-auto">{% render_field teacher_form.pricePerHour.currency class+="select2" %}</div>
+  </div>
+  {{ teacher_form.pricePerHour.errors }}
+  {% endcomment %}
+</div>
+<div id="empty_form" style="display:none">
+  <div class="collapse col-lg-5 col-md-6 col-xs-auto mb-2 text-nowrap">
+    <a href="#"><i class="fas fa-plus subjectdeletebutton" style="color:#000000 !important"></i></a>&nbsp;&nbsp;
+    {% render_field teacher_teaches_formset.empty_form.subject class+="select2 subjectselect" %}
+  </div>
+</div>

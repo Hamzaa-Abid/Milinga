@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="40" height="40" viewBox="0 0 40 40">
+  <defs>
+    <clipPath id="clip-path">
+      <path id="Path_374" data-name="Path 374" d="M-1914.688,1958.936a20,20,0,0,0-19.392,15.2,19.993,19.993,0,0,0,14.605,24.213,19.994,19.994,0,0,0,24.214-14.606,19.992,19.992,0,0,0-14.606-24.213,20.023,20.023,0,0,0-4.819-.591h0" transform="translate(1934.671 -1958.936)" fill="none"/>
+    </clipPath>
+    <radialGradient id="radial-gradient" cx="0.5" cy="0.475" r="0.475" gradientTransform="matrix(0.953, 0, 0, -1, 0.207, 9.691)" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#fff"/>
+      <stop offset="0.781" stop-color="#fff"/>
+      <stop offset="0.815" stop-color="#f9f8f7"/>
+      <stop offset="0.865" stop-color="#e9e5e3"/>
+      <stop offset="0.927" stop-color="#cec7c1"/>
+      <stop offset="0.996" stop-color="#aa9d93"/>
+      <stop offset="1" stop-color="#a89b90"/>
+    </radialGradient>
+  </defs>
+  <g id="Group_52" data-name="Group 52" transform="translate(1934.671 -1958.935)">
+    <g id="Group_47" data-name="Group 47" transform="translate(-1934.671 1958.935)">
+      <g id="Group_46" data-name="Group 46" transform="translate(0 0)" clip-path="url(#clip-path)">
+        <rect id="Rectangle_21" data-name="Rectangle 21" width="44.126" height="42.063" transform="translate(-2.064 0)" fill="url(#radial-gradient)"/>
+      </g>
+    </g>
+    <g id="Group_48" data-name="Group 48" transform="translate(-1934.671 1958.935)">
+      <path id="Path_375" data-name="Path 375" d="M-1934.079,1974.131a19.992,19.992,0,0,1,24.213-14.605,19.993,19.993,0,0,1,14.606,24.213,19.994,19.994,0,0,1-24.214,14.606,19.993,19.993,0,0,1-14.605-24.213" transform="translate(1934.67 -1958.935)" fill="#0b2e60"/>
+    </g>
+    <g id="Group_49" data-name="Group 49" transform="translate(-1934.671 1958.936)">
+      <path id="Path_376" data-name="Path 376" d="M-1900.482,1964.841l-8.041,5.36v-10.289q-.658-.212-1.34-.382a19.905,19.905,0,0,0-11,.4V1970.2l-8.009-5.339a19.865,19.865,0,0,0-4.337,6.591l2.121,1.414h-2.629c-.132.416-.253.837-.359,1.267a19.9,19.9,0,0,0,.42,11.073h2.62l-2.1,1.4a20.1,20.1,0,0,0,4.4,6.547l7.869-5.245v10.041q.684.222,1.392.4a19.9,19.9,0,0,0,10.948-.379v-10.06l7.9,5.266a19.86,19.86,0,0,0,4.413-6.539l-2.142-1.428h2.672q.236-.719.422-1.466a19.91,19.91,0,0,0-.356-10.875h-2.685l2.162-1.441a20.082,20.082,0,0,0-4.347-6.586" transform="translate(1934.666 -1958.94)" fill="#ece6e0"/>
+    </g>
+    <g id="Group_50" data-name="Group 50" transform="translate(-1934.67 1958.936)">
+      <path id="Path_377" data-name="Path 377" d="M-1923.93,1972.871l-7.425-4.938a19.836,19.836,0,0,0-1.335,2.36l3.876,2.578Zm25.938-4.978a20.07,20.07,0,0,0-1.647-2.154l-8.875,5.9v1.229h3.04Zm-33.308,22.133a20.1,20.1,0,0,0,1.651,2.149l8.795-5.849v-1.115h-3.206Zm36.333-14.585h-16.117V1959.27a19.888,19.888,0,0,0-7.2,0v16.168h-16.059a19.876,19.876,0,0,0,.03,7.2h16.028V1998.6a19.884,19.884,0,0,0,7.2.015v-15.981h16.076a19.886,19.886,0,0,0,.041-7.2m-10.336,9.771,7.276,4.839a19.8,19.8,0,0,0,1.348-2.352l-3.74-2.487Z" transform="translate(1934.657 -1958.943)" fill="#e71e1a"/>
+    </g>
+    <g id="Group_51" data-name="Group 51" transform="translate(-1908.526 1961.937)">
+      <path id="Path_378" data-name="Path 378" d="M-1676.54,1989.087h0v1.274a2.257,2.257,0,0,0,.118-.685,1.428,1.428,0,0,0-.118-.589" transform="translate(1676.54 -1989.087)" fill="#1d3054"/>
+    </g>
+  </g>
+</svg>

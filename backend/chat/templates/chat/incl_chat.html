@@ -1,0 +1,263 @@
+{% load static %}
+<!---------------------------------------------------- CHAT START ---------------------------------------------------->
+<script>
+sChatMyName = '{{ user.first_name }} {{ user.last_name }}';
+sChatMyImage = '{% if user.profile.profilePic %}{{ user.profile.profilePic.url }}{% else %}{% static "img/noprofilepic.png" %}{% endif %}';
+sChatPartnerId = '';
+var oChats = [];
+
+$(function () {
+    wsSend('chat_init', {}, function(oChatsP){
+        oChats = oChatsP;
+        $.each(oChats, function(sId, oChatData){
+            addChatBuddy(sId, oChatData);
+        })
+        if(oChats !== undefined && !$.isEmptyObject(oChats)) {
+            setActiveChat(Object.keys(oChats)[0]);
+            if (Cookies.get('chatopen') === "true"){
+                openChat();
+            } else {
+                closeChat();
+            };
+        }
+    })
+
+    wsOnReceive('chat', function(oChatMessage){ //Message empfangen
+        if(oChatMessage.sentByMe === false){
+            oAudioIncomingMessage = $('audio#incoming_message')[0];
+            oAudioIncomingMessage.currentTime = 0
+            oAudioIncomingMessage.play()
+        }
+        if(oChatMessage.id == sChatPartnerId){
+            displayMessage({
+                'sentByMe': oChatMessage.sentByMe,
+                'nameOfChatPartner': oChatMessage.name,
+                'timestamp': oChatMessage.timestamp,
+                'imageURL': (oChatMessage.imageURL?oChatMessage.imageURL:getActiveChat().imageURL),
+                'message': oChatMessage.message,
+            })
+        }
+        saveMessageToArray(oChatMessage);
+
+        if(isChatOpen()===false){
+            setActiveChat(oChatMessage.id)
+            openChat();
+        }
+    })
+    wsOnReceive('chat_select', function(sId){
+        setActiveChat(sId);
+    })
+
+    $('#send_message').click(onMessageSend);
+    $('#message_input').keyup(function (e) {
+        if (e.which === 13) {
+            return onMessageSend();
+        }
+    });
+
+ });
+
+
+function newChat(oChatData){
+    var oChat;
+    if(oChatData.id in oChats){
+        oChat = oChats[oChatData.id];
+    } else {
+        oChats[oChatData.id] = {
+            'name': oChatData.name,
+            'imageURL': oChatData.imageURL,
+            'messages': [],
+        }
+    }
+    setActiveChat(oChatData.id);
+    openChat();
+}
+
+function setActiveChat(sChatId){
+    sChatPartnerId = sChatId;
+    oChat = oChats[sChatId];
+    $('#chat_partner_name').text(oChat.name);
+    $('#chat_messages').empty();
+    $.each(oChat.messages, function(j, oMessage){
+        displayMessage({
+            'sentByMe': oMessage.sentByMe,
+            'nameOfChatPartner': oChat.name,
+            'timestamp': oMessage.timestamp,
+            'imageURL': oChat.imageURL,
+            'message': oMessage.message,
+            'noscroll': true,
+        })
+    })
+    $('#chat_messages').scrollTop($('#chat_messages').prop('scrollHeight'));
+}
+
+function displayMessage(oMessage){
+    $('#chat_messages').append(`
+    <div class="direct-chat-msg `+(oMessage.sentByMe==true?'right':'left')+`">
+        <div class="direct-chat-infos clearfix">
+        <span class="direct-chat-name float-`+(oMessage.sentByMe==true?'right':'left')+`">`+(oMessage.sentByMe==true?sChatMyName:oMessage.nameOfChatPartner)+`</span>
+        <span class="direct-chat-timestamp float-`+(oMessage.sentByMe==true?'left':'right')+`">`+new Date(oMessage.timestamp*1000).toLocaleString()+`</span>
+        </div>
+        <img class="direct-chat-img" src="`+(oMessage.sentByMe==true?sChatMyImage:oMessage.imageURL)+`" alt="message user image">
+        <div class="direct-chat-text">
+        `+oMessage.message+`
+        </div>
+    </div>
+    `)
+    if(oMessage.noscroll !== true) {
+        $('#chat_messages').stop().animate({
+            'scrollTop': $('#chat_messages').prop('scrollHeight')
+        }, 500, 'swing');
+    }
+}
+
+function addChatBuddy(sId, oChatData){
+    var oLastMessage = oChatData.messages[oChatData.messages.length - 1];
+    var oUIChatContact = $(`
+    <li>
+        <a href="#">
+            <img class="contacts-list-img" src="`+oChatData.imageURL+`">
+            <div class="contacts-list-info">
+            <span class="contacts-list-name">
+                `+oChatData.name+`
+                <small class="contacts-list-date float-right">`+new Date(oLastMessage.timestamp*1000).toLocaleString()+`</small>
+            </span>
+            <span class="contacts-list-msg">`+oLastMessage.message+`</span>
+            </div>
+        </a>
+    </li>`);
+    $('#chat_contacts_list').append(oUIChatContact);
+    oUIChatContact.click(function(){
+        wssendToOtherMe('chat_select', sId);
+        setActiveChat(sId);
+        $('#direct-chat').directChat('hide')
+    })
+}
+
+
+function getActiveChat() {
+    return oChats[sChatPartnerId];
+}
+
+function saveMessageToArray(oChatMessage){
+    var oChat = oChats[oChatMessage.id];
+    if(oChat === undefined){
+        oChat = oChats[oChatMessage.id] = {
+            'name': oChatMessage.name,
+            'imageURL': oChatMessage.imageURL,
+            messages : [],
+        }
+        addChatBuddy(oChatMessage.id, {
+            'imageURL' : oChatMessage.imageURL,
+            'name': oChatMessage.name,
+            'timestamp': oChatMessage.timestamp,
+            'messages': [
+                oChatMessage.message,
+            ]
+        })
+    }
+    oChat.messages.push(oChatMessage);
+}
+
+function onMessageSend() {
+    var sMessage = $('#message_input').val();
+    if (sMessage.trim() === '') {
+        $('#message_input').focus();
+        return;
+    }
+    $('#message_input').val('');
+    wsSend('chat_sendmsg', {
+        to: sChatPartnerId,
+        msg: sMessage
+    });
+    var oMessage = {
+        'id': sChatPartnerId,
+        'sentByMe': true,
+        // 'nameOfChatPartner': oChat.name,
+        'timestamp': new Date().getTime()/1000,
+        // 'imageURL': getActiveChat().imageURL,
+        'message': sMessage,
+    }
+    displayMessage(oMessage);
+    saveMessageToArray(oMessage);
+    $('#message_input').focus();
+};
+
+
+
+function onOpenChatClicked(){
+    wssendToOtherMe('chat_open', true);
+    openChat()
+}
+function onCloseChatClicked(){
+    wssendToOtherMe('chat_open', false);
+    closeChat()
+}
+$(function(){
+    wsOnReceive('chat_open', function(bOpenChat){
+        if(bOpenChat){
+            openChat();
+        } else {
+            closeChat();
+        }
+    })
+})
+
+var bChatIsOpen=false;
+function openChat(){
+    $('#chaticon').addClass('d-none');
+    $('#chatview').removeClass('d-none');
+    Cookies.set('chatopen', "true", { expires: 1 });
+    bChatIsOpen = true;
+    $('#message_input').focus();
+}
+function closeChat(){
+    $('#chaticon').removeClass('d-none');
+    $('#chatview').addClass('d-none');
+    Cookies.set('chatopen', "false", { expires: 1 });
+    bChatIsOpen = false;
+}
+function isChatOpen(){
+    return bChatIsOpen;
+}
+
+
+</script>
+<audio id="incoming_message">
+  <source src="{% static 'sounds/incoming_message.wav' %}" type="audio/wav">
+</audio>
+<div class="fixed-bottom-right">
+    <div class="d-none container" id="chaticon">
+        <i class="fas fa-comments fa-3x"></i><br>
+        CHAT
+        <a href="javascript:onOpenChatClicked()" class="stretched-link"></a>
+    </div>
+   <div class="d-none card card-danger direct-chat direct-chat-danger" id="chatview">
+        <div class="card-header">
+            <!-- <h3 class="card-title" id='chat_partner_name'></h3> -->
+            <div class="card-tools d-flex">
+                <span class="mr-auto" id='chat_partner_name'></span>
+                <!-- <span data-toggle="tooltip" title="3 New Messages" class="badge badge-pill badge-danger">3</span> -->
+                <button type="button" class="btn btn-tool" data-toggle="tooltip" title="Contacts" data-widget="chat-pane-toggle"><i class="fas fa-users"></i></button>
+                <button type="button" class="btn btn-tool" onclick="onCloseChatClicked()" title="minimize"><i class="fas fa-compress-arrows-alt"></i></button>
+            </div>
+        </div>
+        <div class="card-body" id='direct-chat'>
+            <div class="direct-chat-messages" id='chat_messages'></div>
+            <div class="direct-chat-contacts">
+                <ul class="contacts-list" id="chat_contacts_list"></ul>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="input-group">
+                <input type="text" id="message_input" placeholder="Type Message ..." class="form-control">
+                <span class="input-group-append">
+                    <button type="button" class="btn btn-primary" id="send_message">Send</button>
+                </span>
+            </div>
+        </div>
+    </div>
+
+</div>
+<!---------------------------------------------------- CHAT END ---------------------------------------------------->
+
